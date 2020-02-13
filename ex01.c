@@ -4,6 +4,9 @@
 #include <stdio.h>    // file IO, perror()
 #include <string.h>   // str(n)cpy()
 #include <stdbool.h>  // Bool type
+#include <getopt.h>
+#include <stdlib.h>
+
 
 // Function prototypes:
 void print_help();
@@ -12,13 +15,64 @@ void print_env(char* envp[]);
 
 
 int main(int argc, char* argv[], char* envp[]) {
+
+  int c;
+  int digit_optind = 0;
+
   // If no arguments are given, print help
-  
   // Set up struct option array long_options[]
+  while(1) {
+    int this_option_optind = optind ? optind : 1;
+
+
+    static struct option long_options[] = {
+                   {"help",    no_argument, 0, 'h'},
+                   {"file",    required_argument, 0, 'f'},
+                   {"end",     required_argument, 0, 'e'},
+                   {"env",     no_argument, 0, 'v'},
+                   {0,         0,                 0,  0 }
+               };
+
+    c = getopt_long(argc, argv, "hf:e:v",
+                        long_options, NULL);
+    if (argc < 2)
+      print_help();
+    if (c == -1)
+      break;
+    
+    switch (c) {
+
+    case 'h':
+      print_help();
+      break;
+    case 'f':
+      read_file(optarg, 0);
+      break;
+    case 'e':
+      read_file(optarg, 1);
+      break;
+    case 'v':
+      print_env(envp);
+      break;
+    case '?':
+      print_help();
+      break;
+    default:
+      print_help();
+      break;
+    }
+}
   
   // Scan the different command-line arguments and options
-  return 0;
-}
+  if (optind < argc) {
+               printf("non-option ARGV-elements: ");
+               while (optind < argc)
+                   printf("%s ", argv[optind++]);
+               printf("\n");
+           }
+
+exit(EXIT_SUCCESS); }
+
 
 
 // Print program help:
