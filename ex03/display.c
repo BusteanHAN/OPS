@@ -8,11 +8,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/resource.h>
+#include <unistd.h>
 #include "displayFunctions.h"
 
 int main(int argc, char *argv[]) {
   unsigned long int numOfTimes;
-  char printMethod, printChar;
+  unsigned int niceIncr;
+  char printMethod;//, printChar;
   ErrCode err;
   
   err = SyntaxCheck(argc, argv);  // Check the command-line parameters
@@ -21,9 +26,19 @@ int main(int argc, char *argv[]) {
   } else {
     printMethod = argv[1][0];
     numOfTimes = strtoul(argv[2], NULL, 10);  // String to unsigned long
-    printChar = argv[3][0];
-    
-    PrintCharacters(printMethod, numOfTimes, printChar);  // Print character printChar numOfTimes times using method printMethod
+    niceIncr =   strtoul(argv[3], NULL, 10);
+    //printChar = argv[4][0];
+    for(int iChild = 0; iChild < argc - 4; iChild++) {
+      if(fork() == 0) {
+	nice(iChild*niceIncr);
+	printf("%d %c %d \n",iChild*niceIncr, argv[iChild + 4][0], getpriority(PRIO_PROCESS, 0));
+	PrintCharacters(printMethod, numOfTimes, argv[iChild + 4][0]);  // Print character printChar numOfTimes times using method printMethod
+	exit(0);
+      }
+    }
+    for(int iChild = 0; iChild < argc - 4; iChild++) {
+      wait(NULL);
+    }
   }
   
   printf("\n");  // Newline at end

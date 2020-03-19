@@ -15,7 +15,7 @@
 // Check the command-line parameters:
 ErrCode SyntaxCheck(int argc, char **argv) {
   ErrCode errCode = NO_ERR;
-  if(argc != NUM_OF_PARS) {
+  if(argc < 3) {
     errCode = ERR_PARS;
   } else {
     errCode = TestType(argv[1]);                        // Test whether argument 1 has the correct value (print type)
